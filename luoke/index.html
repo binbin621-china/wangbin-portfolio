@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>洛克王国召唤器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #3d1f0a;
+      font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+      user-select: none;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background: url('bg.jpg') center/cover no-repeat;
+      z-index: 0;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(61, 31, 10, 0.55);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease;
+      cursor: pointer;
+    }
+    .overlay.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .overlay h1 {
+      font-size: 3.5rem;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(255, 140, 0, 0.8), 0 0 60px rgba(255, 100, 0, 0.5);
+      margin-bottom: 2rem;
+      animation: breathe 2s ease-in-out infinite;
+    }
+
+    .overlay-hint {
+      margin-top: 2rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.2rem;
+      animation: breathe 2s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+    }
+
+    .center-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 8rem;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 0 40px rgba(255, 140, 0, 0.9), 0 0 80px rgba(255, 80, 0, 0.6);
+      z-index: 5;
+      pointer-events: none;
+      animation: crazyShake 0.35s ease-in-out infinite, colorShift 2s linear infinite;
+      display: none;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .center-text.show { display: block; }
+
+    @keyframes crazyShake {
+      0%, 100% { transform: translate(-50%, -50%) rotate(-2deg) scale(1); }
+      25% { transform: translate(-48%, -52%) rotate(3deg) scale(1.08); }
+      50% { transform: translate(-52%, -48%) rotate(-3deg) scale(0.95); }
+      75% { transform: translate(-49%, -51%) rotate(2deg) scale(1.05); }
+    }
+    @keyframes colorShift {
+      0% { text-shadow: 0 0 40px rgba(255, 140, 0, 0.9); color: #ff9f43; }
+      25% { text-shadow: 0 0 40px rgba(255, 200, 0, 0.9); color: #feca57; }
+      50% { text-shadow: 0 0 40px rgba(255, 80, 0, 0.9); color: #ff6b35; }
+      75% { text-shadow: 0 0 40px rgba(255, 220, 100, 0.9); color: #ffeaa7; }
+      100% { text-shadow: 0 0 40px rgba(255, 140, 0, 0.9); color: #ff9f43; }
+    }
+
+    .popup {
+      position: fixed;
+      padding: 0.7rem 1.4rem;
+      border-radius: 14px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #fff;
+      z-index: 10;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+      animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      cursor: default;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      max-width: 320px;
+      word-break: break-all;
+    }
+    .popup .close {
+      margin-left: 0.4rem;
+      cursor: pointer;
+      font-size: 1.1rem;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+    .popup .close:hover { opacity: 1; }
+
+    @keyframes popIn {
+      0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .win-popup {
+      position: fixed;
+      width: 300px;
+      background: #fff8f0;
+      border: 3px solid #ff9f43;
+      border-radius: 12px;
+      z-index: 20;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      animation: winPop 0.3s ease;
+      overflow: hidden;
+    }
+    .win-header {
+      background: linear-gradient(90deg, #ff9f43, #ff6b35);
+      color: #fff;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+    }
+    .win-close {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .win-body {
+      padding: 1.2rem;
+      color: #5a3a1a;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    .win-body .icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .win-btn {
+      margin-top: 0.8rem;
+      padding: 0.5rem 2rem;
+      background: linear-gradient(135deg, #ff9f43, #ff6b35);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .win-btn:hover { background: linear-gradient(135deg, #ff6b35, #ee5a24); }
+
+    @keyframes winPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .counter {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(90, 40, 10, 0.75);
+      color: #ffeaa7;
+      padding: 0.5rem 1.5rem;
+      border-radius: 30px;
+      font-size: 1rem;
+      z-index: 50;
+      display: none;
+      border: 1px solid rgba(255, 159, 67, 0.4);
+    }
+    .counter.show { display: block; }
+
+    .top-hint {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 107, 53, 0.9);
+      color: #fff;
+      padding: 0.5rem 1.5rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      z-index: 50;
+      display: none;
+      animation: shake 0.5s ease infinite;
+      white-space: nowrap;
+    }
+    .top-hint.show { display: block; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(-50%) rotate(0deg); }
+      25% { transform: translateX(-50%) rotate(-2deg); }
+      75% { transform: translateX(-50%) rotate(2deg); }
+    }
+
+    .floater {
+      position: fixed;
+      font-size: 2.8rem;
+      z-index: 3;
+      pointer-events: none;
+      animation: floatUp 3s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(0.5); opacity: 1; }
+      100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <div class="overlay" id="overlay">
+    <h1>🔥 洛克王国召唤器 🔥</h1>
+    <p class="overlay-hint">👉 点击任意位置开始召唤 👈</p>
+  </div>
+
+  <div class="center-text" id="centerText">洛克王国<br>启动</div>
+
+  <div class="counter" id="counter">已召唤 <span id="countNum">0</span> 次</div>
+
+  <div class="top-hint" id="topHint">⚠️ 疯狂点击关闭会召唤更多！按 ESC 5次可停止 ⚠️</div>
+
+  <script>
+    const overlay = document.getElementById('overlay');
+    const centerText = document.getElementById('centerText');
+    const counter = document.getElementById('counter');
+    const countNum = document.getElementById('countNum');
+    const topHint = document.getElementById('topHint');
+
+    const messages = [
+      '上号抓异色', '上号抓精灵', '洛克王国启动',
+      '瓦斯叮当在等你', '格兰酋长喊你上号', '守护兽饿死了',
+      '仓库又满了', '天赋刷到31了吗', '性格洗了吗',
+      '喵喵进化了吗', '火神超进化！', '水灵被你饿瘦了',
+      '阿布还在等你', '八大徽章集齐了吗', '速度果还有吗',
+      '再不上号VIP过期了', '魔法日记更新了', '农场菜被偷光了',
+      '迪莫发光了', '圣光迪莫在召唤', '再抓一只就睡了',
+      '这只天赋不行，继续刷', '暴击！出了！', '极品性格！',
+      '宠物园走一走', '雪人谷吹吹风', '雷霆峡谷电一电',
+      '轻风山还能进吗', '老玩家回归了', '童年回忆杀',
+      '魔力猫在哭', '音速犬跑不动了', '库拉还在发电',
+      '帕尔萨斯又双叒加强了', '暗夜魔王：？', '年费宠又更新了'
+    ];
+
+    const colors = [
+      '#ff9f43', '#ff6b35', '#feca57', '#ee5a24',
+      '#e67e22', '#d35400', '#e74c3c', '#c0392b',
+      '#f39c12', '#e67e22', '#d35400', '#e74c3c'
+    ];
+
+    let count = 0;
+    let popupInterval;
+    let floatInterval;
+    let escCount = 0;
+    let isRunning = false;
+    let audioCtx;
+    let bgmInterval;
+    let audioStarted = false;
+
+    const notes = {
+      'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61,
+      'G2': 98.00, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+      'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
+      'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25,
+      'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99
+    };
+
+    const melody = [
+      'C4','E4','G4','C5','G4','E4','C4',null,
+      'D4','F4','A4','D5','A4','F4','D4',null,
+      'E4','G4','B4','E5','B4','G4','E4',null,
+      'C4','E4','G4','C5','G4','E4','C4',null
+    ];
+    const bassLine = [
+      'C3',null,'G2',null,'C3',null,'G2',null,
+      'D3',null,'A2',null,'D3',null,'A2',null,
+      'E3',null,'B2',null,'E3',null,'B2',null,
+      'C3',null,'G2',null,'C3',null,'G2',null
+    ];
+
+    function playTone(freq, duration, type, volume) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type || 'square';
+      osc.frequency.value = freq;
+      gain.gain.value = volume || 0.08;
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playPopupSound() {
+      if (!audioCtx) return;
+      playTone(notes['G5'], 0.08, 'sine', 0.05);
+      setTimeout(() => playTone(notes['C5'], 0.1, 'sine', 0.04), 80);
+    }
+
+    function playStartSound() {
+      if (!audioCtx) return;
+      [notes['C4'], notes['E4'], notes['G4'], notes['C5'], notes['E5']].forEach((f, i) => {
+        setTimeout(() => playTone(f, 0.18, 'square', 0.1), i * 100);
+      });
+      setTimeout(() => playTone(55, 0.15, 'sawtooth', 0.2), 0);
+      setTimeout(() => playTone(55, 0.15, 'sawtooth', 0.2), 400);
+    }
+
+    function startBGM() {
+      let step = 0;
+      bgmInterval = setInterval(() => {
+        if (!isRunning) return;
+        const m = melody[step % melody.length];
+        if (m) playTone(notes[m], 0.14, 'square', 0.07);
+        const b = bassLine[step % bassLine.length];
+        if (b) playTone(notes[b], 0.2, 'sawtooth', 0.05);
+        if (step % 4 === 0) playTone(45, 0.1, 'sawtooth', 0.1);
+        step++;
+      }, 140);
+    }
+
+    function stopAudio() {
+      if (bgmInterval) clearInterval(bgmInterval);
+      if (audioCtx) audioCtx.close();
+      audioCtx = null;
+      audioStarted = false;
+    }
+
+    overlay.addEventListener('click', () => {
+      if (isRunning) return;
+      if (!audioStarted) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioStarted = true;
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      overlay.classList.add('hide');
+      centerText.classList.add('show');
+      counter.classList.add('show');
+      topHint.classList.add('show');
+      isRunning = true;
+
+      playStartSound();
+      setTimeout(startBGM, 500);
+
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => { createPopup(); playPopupSound(); }, i * 150);
+      }
+
+      popupInterval = setInterval(() => { createPopup(); playPopupSound(); }, 600);
+      floatInterval = setInterval(createFloater, 800);
+
+      setTimeout(() => createWinPopup(), 2000);
+      setTimeout(() => createWinPopup(), 6000);
+    });
+
+    function createPopup() {
+      const popup = document.createElement('div');
+      popup.className = 'popup';
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      popup.style.background = color;
+      popup.style.left = Math.random() * (window.innerWidth - 220) + 'px';
+      popup.style.top = Math.random() * (window.innerHeight - 80) + 'px';
+      popup.style.transform = `rotate(${Math.random() * 16 - 8}deg)`;
+      popup.innerHTML = `${msg}<span class="close">✕</span>`;
+      document.body.appendChild(popup);
+
+      count++;
+      countNum.textContent = count;
+
+      popup.querySelector('.close').addEventListener('click', (e) => {
+        e.stopPropagation();
+        popup.remove();
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => { createPopup(); playPopupSound(); }, i * 100);
+        }
+      });
+
+      setTimeout(() => {
+        if (popup.parentNode) {
+          popup.style.transition = 'opacity 0.5s, transform 0.5s';
+          popup.style.opacity = '0';
+          popup.style.transform += ' scale(0)';
+          setTimeout(() => popup.remove(), 500);
+        }
+      }, 5000);
+    }
+
+    function createWinPopup() {
+      if (!isRunning) return;
+      const win = document.createElement('div');
+      win.className = 'win-popup';
+      win.style.left = Math.random() * (window.innerWidth - 320) + 20 + 'px';
+      win.style.top = Math.random() * (window.innerHeight - 200) + 20 + 'px';
+      win.innerHTML = `
+        <div class="win-header">
+          <span>洛克王国系统</span>
+          <span class="win-close">✕</span>
+        </div>
+        <div class="win-body">
+          <div class="icon">🐉</div>
+          <div>检测到您尚未登录洛克王国</div>
+          <div style="margin-top:0.3rem;font-size:0.8rem;color:#888;">守护兽已饥饿24小时，请立即上号投喂</div>
+          <button class="win-btn">立即上号</button>
+        </div>
+      `;
+      document.body.appendChild(win);
+
+      count += 2;
+      countNum.textContent = count;
+
+      win.querySelector('.win-close').addEventListener('click', () => {
+        win.remove();
+        for (let i = 0; i < 4; i++) setTimeout(() => { createPopup(); playPopupSound(); }, i * 80);
+      });
+      win.querySelector('.win-btn').addEventListener('click', () => {
+        win.remove();
+        for (let i = 0; i < 6; i++) setTimeout(() => { createPopup(); playPopupSound(); }, i * 60);
+      });
+
+      setTimeout(() => { if (win.parentNode) win.remove(); }, 7000);
+    }
+
+    function createFloater() {
+      const emojis = ['🐉', '🔥', '⚡', '💎', '🎮', '🐾', '⭐', '🏆', '🧚', '🦊'];
+      const el = document.createElement('div');
+      el.className = 'floater';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = Math.random() * window.innerWidth + 'px';
+      el.style.bottom = '10%';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isRunning) {
+        escCount++;
+        if (escCount >= 5) {
+          isRunning = false;
+          clearInterval(popupInterval);
+          clearInterval(floatInterval);
+          stopAudio();
+          centerText.textContent = '已结束';
+          centerText.style.animation = 'none';
+          topHint.textContent = '✅ 召唤已停止，刷新页面可重新开始';
+          topHint.style.background = 'rgba(0,150,0,0.85)';
+        } else {
+          topHint.textContent = `再按 ${5 - escCount} 次 ESC 可停止...`;
+        }
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (isRunning && e.target === document.body) {
+        createPopup();
+        playPopupSound();
+      }
+    });
+  </script>
+</body>
+</html>
