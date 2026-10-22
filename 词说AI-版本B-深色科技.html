@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>词说AI - 深色科技版</title>
+<style>
+  :root {
+    --primary: #A78BFA;
+    --primary-dark: #7C3AED;
+    --bg: #0F0F1A;
+    --surface: #1A1A2E;
+    --surface2: #252542;
+    --text: #F3F4F6;
+    --text2: #9CA3AF;
+    --border: rgba(167,139,250,0.15);
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --radius: 16px;
+    --danger: #F87171;
+    --warning: #FBBF24;
+    --success: #34D399;
+    --glow: 0 0 20px rgba(167,139,250,0.25);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text); width:100%; max-width:430px; margin:0 auto; min-height:100vh; overflow-x:hidden; }
+  .page { display:none; padding:20px 16px 100px; animation: fadeIn 0.4s ease; }
+  .page.active { display:block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(16px);} to { opacity:1; transform: translateY(0);} }
+  .nav-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .nav-title { font-size:18px; font-weight:700; letter-spacing:0.5px; }
+  .back-btn { width:36px; height:36px; border-radius:12px; background:var(--surface); display:flex; align-items:center; justify-content:center; border:1px solid var(--border); cursor:pointer; color:var(--text); }
+  .card { background:var(--surface); border-radius:var(--radius); padding:20px; border:1px solid var(--border); margin-bottom:16px; }
+  .btn-primary { width:100%; padding:16px; border-radius:14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; font-size:16px; font-weight:700; border:none; cursor:pointer; box-shadow: var(--glow); }
+  .btn-secondary { width:100%; padding:14px; border-radius:14px; background:var(--surface2); color:var(--text); font-size:15px; font-weight:600; border:1px solid var(--border); cursor:pointer; }
+  .badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; background: rgba(167,139,250,0.15); color: var(--primary); border:1px solid var(--border); }
+
+  .home-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  .avatar { width:44px; height:44px; border-radius:14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:18px; box-shadow: var(--glow); }
+  .streak { display:flex; align-items:center; gap:6px; font-size:14px; color:var(--text2); }
+  .stat-row { display:flex; gap:12px; margin-bottom:24px; }
+  .stat-card { flex:1; background:var(--surface); border-radius:var(--radius); padding:18px 12px; border:1px solid var(--border); text-align:center; position:relative; overflow:hidden; }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); }
+  .stat-num { font-size:26px; font-weight:800; background: linear-gradient(135deg, var(--primary), #C4B5FD); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .stat-label { font-size:11px; color:var(--text2); margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .home-main-btn { margin: 8px 0 24px; }
+  .section-title { font-size:14px; font-weight:700; margin-bottom:12px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; }
+  .book-card { display:flex; align-items:center; gap:14px; }
+  .book-icon { width:52px; height:52px; border-radius:14px; background: linear-gradient(135deg, #6366F1, #4338CA); display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; box-shadow: 0 4px 16px rgba(99,102,241,0.35); }
+  .book-info { flex:1; }
+  .book-name { font-weight:700; font-size:15px; }
+  .book-meta { font-size:12px; color:var(--text2); margin-top:2px; }
+  .quick-actions { display:flex; gap:10px; }
+  .qa-btn { flex:1; background:var(--surface); border-radius:var(--radius); padding:16px; text-align:center; border:1px solid var(--border); cursor:pointer; transition:0.3s; }
+  .qa-btn:active { border-color: var(--primary); }
+  .qa-icon { font-size:22px; margin-bottom:6px; }
+  .qa-label { font-size:12px; color:var(--text2); }
+
+  .search-box { width:100%; padding:12px 16px; border-radius:14px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:15px; outline:none; margin-bottom:16px; }
+  .tag-row { display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
+  .tag { padding:8px 14px; border-radius:20px; background:var(--surface); font-size:13px; color:var(--text2); white-space:nowrap; cursor:pointer; border:1px solid transparent; }
+  .tag.active { border-color: var(--primary); color: var(--primary); font-weight:600; background: rgba(167,139,250,0.1); }
+  .book-list-item { display:flex; align-items:center; gap:14px; padding:16px; background:var(--surface); border-radius:var(--radius); margin-bottom:12px; border:1px solid var(--border); }
+  .book-list-icon { width:48px; height:48px; border-radius:12px; background: linear-gradient(135deg, var(--primary), #6366F1); display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; }
+  .book-progress { width:100%; height:4px; background:var(--surface2); border-radius:2px; margin-top:8px; overflow:hidden; }
+  .book-progress-bar { height:100%; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); border-radius:2px; }
+
+  .progress-bar-outer { width:100%; height:6px; background:var(--surface2); border-radius:3px; margin-bottom:24px; overflow:hidden; }
+  .progress-bar-inner { height:100%; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); border-radius:3px; transition: width 0.3s; box-shadow: 0 0 10px rgba(167,139,250,0.4); }
+  .word-card { background:var(--surface); border-radius:var(--radius); padding:44px 24px; text-align:center; border:1px solid var(--border); margin-bottom:28px; position:relative; }
+  .word-card::after { content:''; position:absolute; inset:0; border-radius:var(--radius); background: linear-gradient(135deg, rgba(167,139,250,0.06), transparent); pointer-events:none; }
+  .word-text { font-size:38px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px; }
+  .word-phonetic { font-size:16px; color:var(--text2); margin-bottom:12px; }
+  .word-meaning { font-size:18px; color:var(--text2); }
+  .speaker-btn { width:48px; height:48px; border-radius:50%; background: rgba(167,139,250,0.12); display:flex; align-items:center; justify-content:center; margin:18px auto 0; cursor:pointer; color: var(--primary); font-size:20px; border:1px solid var(--border); }
+  .action-btns { display:flex; gap:10px; }
+  .action-btn { flex:1; padding:14px; border-radius:12px; border:none; font-size:15px; font-weight:700; cursor:pointer; }
+  .btn-know { background: var(--success); color:#0F0F1A; }
+  .btn-vague { background: var(--warning); color:#0F0F1A; }
+  .btn-unknow { background: var(--danger); color:#0F0F1A; }
+  .detail-link { text-align:center; margin-top:18px; font-size:13px; color:var(--text2); cursor:pointer; }
+
+  .chat-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .chat-pool { background: rgba(167,139,250,0.08); border-radius:12px; padding:10px 14px; font-size:13px; color:var(--text2); border:1px solid var(--border); margin-bottom:12px; }
+  .chat-area { background:var(--surface); border-radius:var(--radius); padding:16px; min-height:380px; max-height:460px; overflow-y:auto; border:1px solid var(--border); margin-bottom:12px; }
+  .msg { display:flex; margin-bottom:14px; }
+  .msg.ai { justify-content:flex-start; }
+  .msg.user { justify-content:flex-end; }
+  .msg-bubble { max-width:78%; padding:12px 16px; border-radius:18px; font-size:15px; line-height:1.5; }
+  .msg.ai .msg-bubble { background:var(--surface2); color:var(--text); border-bottom-left-radius:4px; border:1px solid var(--border); }
+  .msg.user .msg-bubble { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; border-bottom-right-radius:4px; }
+  .msg-voice { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; margin-top:6px; }
+  .msg.ai .msg-voice { background:var(--surface2); color:var(--primary); margin-left:4px; border:1px solid var(--border); }
+  .msg.user .msg-voice { background:rgba(255,255,255,0.2); color:#fff; margin-right:4px; }
+  .chat-input-area { display:flex; align-items:center; gap:10px; }
+  .mic-btn { width:56px; height:56px; border-radius:50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:24px; border:none; cursor:pointer; box-shadow: var(--glow); }
+  .chat-text-input { flex:1; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:15px; outline:none; }
+
+  .report-section { margin-bottom:20px; }
+  .report-title { font-size:15px; font-weight:700; margin-bottom:10px; }
+  .word-tag-list { display:flex; flex-wrap:wrap; gap:8px; }
+  .word-tag { padding:6px 12px; border-radius:20px; font-size:13px; background:var(--surface2); border:1px solid var(--border); }
+  .word-tag.correct { border-color: rgba(52,211,153,0.4); color: #34D399; }
+  .word-tag.wrong { border-color: rgba(248,113,113,0.4); color: #F87171; }
+  .word-tag.ai { border-color: rgba(156,163,175,0.3); color: #9CA3AF; }
+  .error-item { background:var(--surface); border-radius:14px; padding:14px; margin-bottom:10px; border:1px solid var(--border); }
+  .error-original { text-decoration: line-through; color: var(--danger); font-size:14px; }
+  .error-correct { color: var(--success); font-size:15px; font-weight:700; margin-top:4px; }
+  .error-note { font-size:13px; color:var(--text2); margin-top:4px; }
+
+  .word-list-item { display:flex; align-items:center; gap:12px; padding:14px; background:var(--surface); border-radius:14px; margin-bottom:10px; border:1px solid var(--border); }
+  .word-list-check { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); cursor:pointer; }
+  .word-list-check.checked { background:var(--primary); border-color:var(--primary); }
+  .word-list-text { flex:1; }
+  .word-list-word { font-weight:700; font-size:15px; }
+  .word-list-mean { font-size:13px; color:var(--text2); }
+
+  .chart-placeholder { width:100%; height:180px; background: linear-gradient(135deg, var(--surface2), var(--surface)); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; color:var(--text2); font-size:14px; border:1px solid var(--border); margin-bottom:16px; }
+  .setting-item { display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--surface); border-radius:14px; margin-bottom:10px; border:1px solid var(--border); }
+  .toggle { width:50px; height:28px; border-radius:14px; background:var(--surface2); position:relative; cursor:pointer; transition:0.3s; border:1px solid var(--border); }
+  .toggle.on { background: var(--primary-dark); border-color: var(--primary); }
+  .toggle::after { content:''; position:absolute; width:24px; height:24px; border-radius:50%; background:#fff; top:1px; left:1px; transition:0.3s; }
+  .toggle.on::after { left:23px; }
+
+  .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(15,15,26,0.95); backdrop-filter: blur(10px); display:flex; justify-content:space-around; padding:10px 0 24px; border-top:1px solid var(--border); }
+  .nav-item { text-align:center; cursor:pointer; color:var(--text2); font-size:11px; }
+  .nav-item.active { color:var(--primary); }
+  .nav-item-icon { font-size:22px; margin-bottom:2px; }
+</style>
+</head>
+<body>
+
+<div class="page active" id="page-home">
+  <div class="home-header">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="avatar">U</div>
+      <div>
+        <div style="font-weight:700;">学习者</div>
+        <div class="streak"><span style="color:#FBBF24;">⚡</span>连续打卡 7 天</div>
+      </div>
+    </div>
+    <div class="back-btn" onclick="goPage('page-settings')">⚙</div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-num">15</div><div class="stat-label">今日已学</div></div>
+    <div class="stat-card"><div class="stat-num">20</div><div class="stat-label">待复习</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">对话练习</div></div>
+  </div>
+  <button class="btn-primary home-main-btn" onclick="goPage('page-study')">开始学习</button>
+  <div class="section-title">当前词书</div>
+  <div class="card book-card" onclick="goPage('page-books')">
+    <div class="book-icon">📖</div>
+    <div class="book-info">
+      <div class="book-name">四级核心词汇</div>
+      <div class="book-meta">已学 450 / 2380 词</div>
+    </div>
+    <div style="color:var(--text2);">›</div>
+  </div>
+  <div class="section-title">快捷入口</div>
+  <div class="quick-actions">
+    <div class="qa-btn" onclick="goPage('page-favorites')"><div class="qa-icon">⭐</div><div class="qa-label">生词本</div></div>
+    <div class="qa-btn" onclick="goPage('page-history')"><div class="qa-icon">💬</div><div class="qa-label">对话记录</div></div>
+    <div class="qa-btn" onclick="goPage('page-stats')"><div class="qa-icon">📊</div><div class="qa-label">数据统计</div></div>
+  </div>
+</div>
+
+<div class="page" id="page-books">
+  <div class="nav-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div class="nav-title">选择词书</div>
+    <div style="width:36px;"></div>
+  </div>
+  <input class="search-box" placeholder="搜索词书...">
+  <div class="tag-row">
+    <div class="tag active">全部</div><div class="tag">中小学</div><div class="tag">大学应试</div><div class="tag">出国</div><div class="tag">日常口语</div>
+  </div>
+  <div class="book-list-item">
+    <div class="book-list-icon">📗</div>
+    <div class="book-list-info">
+      <div style="font-weight:700;">四级核心词汇</div>
+      <div style="font-size:12px; color:var(--text2); margin-top:2px;">2380 词</div>
+      <div class="book-progress"><div class="book-progress-bar" style="width:19%;"></div></div>
+    </div>
+    <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px;">学习中</button>
+  </div>
+  <div class="book-list-item">
+    <div class="book-list-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">📙</div>
+    <div class="book-list-info">
+      <div style="font-weight:700;">六级高频词汇</div>
+      <div style="font-size:12px; color:var(--text2); margin-top:2px;">1860 词</div>
+      <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+    </div>
+    <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px;">选择</button>
+  </div>
+</div>
+
+<div class="page" id="page-study">
+  <div class="nav-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div style="font-size:15px; font-weight:700;">进度：12/30</div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:40%;"></div></div>
+  <div class="word-card">
+    <div class="word-text">abandon</div>
+    <div class="word-phonetic">/əˈbændən/</div>
+    <div class="word-meaning">v. 抛弃，放弃</div>
+    <div class="speaker-btn">🔊</div>
+  </div>
+  <div class="action-btns">
+    <button class="action-btn btn-unknow" onclick="nextWord()">不认识</button>
+    <button class="action-btn btn-vague" onclick="nextWord()">模糊</button>
+    <button class="action-btn btn-know" onclick="showComplete()">认识</button>
+  </div>
+  <div class="detail-link" onclick="toggleDetail()">查看详情 ›</div>
+  <div id="word-detail" style="display:none; margin-top:12px; padding:16px; background:var(--surface); border-radius:var(--radius); font-size:14px; color:var(--text2); line-height:1.8; border:1px solid var(--border);">
+    <b style="color:var(--primary);">词根：</b>ab-（离开）+ bandon（权力）<br>
+    <b style="color:var(--primary);">例句：</b>They had to abandon their car in the snow.<br>
+    <b style="color:var(--primary);">变形：</b>abandoned, abandoning
+  </div>
+</div>
+
+<div class="page" id="page-complete">
+  <div style="display:flex; align-items:center; justify-content:center; min-height:60vh; flex-direction:column; text-align:center; padding:20px;">
+    <div style="font-size:64px; margin-bottom:16px;">🎉</div>
+    <h2 style="margin-bottom:8px;">本轮单词学习完成</h2>
+    <p style="color:var(--text2); font-size:15px; line-height:1.6; margin-bottom:28px;">一共学习 <b style="color:var(--primary);">30</b> 个单词<br>要不要开启AI对话，用刚学的单词练口语？</p>
+    <button class="btn-primary" style="margin-bottom:12px;" onclick="goPage('page-chat')">开始对话练习</button>
+    <button class="btn-secondary" onclick="goPage('page-home')">跳过，返回首页</button>
+  </div>
+</div>
+
+<div class="page" id="page-chat">
+  <div class="chat-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div style="font-weight:700;">AI 对话练习</div>
+    <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:13px;" onclick="goPage('page-review')">结束</button>
+  </div>
+  <div class="chat-pool">💡 本轮词池：abandon, ability, absolute, absorb, abstract...</div>
+  <div class="chat-area" id="chat-area">
+    <div class="msg ai">
+      <div>
+        <div class="msg-bubble">Hi! Today let's talk about travel. Have you ever had to <b style="color:var(--primary);">abandon</b> a trip plan because of bad weather?</div>
+        <div class="msg-voice">▶</div>
+      </div>
+    </div>
+    <div class="msg user">
+      <div style="display:flex; flex-direction:column; align-items:flex-end;">
+        <div class="msg-bubble">Yes, I once abandoned my camping plan because of heavy rain.</div>
+        <div class="msg-voice">▶</div>
+      </div>
+    </div>
+    <div class="msg ai">
+      <div>
+        <div class="msg-bubble">That happens! The <b style="color:var(--primary);">ability</b> to adapt is important. Do you think you have the ability to handle unexpected situations?</div>
+        <div style="font-size:12px; color:var(--success); margin-top:4px; margin-left:4px;">💡 abandoned 是过去式，你的用法正确 ✓</div>
+        <div class="msg-voice">▶</div>
+      </div>
+    </div>
+  </div>
+  <div class="chat-input-area">
+    <div class="mic-btn">🎤</div>
+    <input class="chat-text-input" placeholder="按住说话或输入文字...">
+    <button style="padding:12px 18px; border-radius:14px; background:var(--primary); color:#fff; border:none; font-weight:700; cursor:pointer;">发送</button>
+  </div>
+  <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:8px;">已对话 3/8 轮</div>
+</div>
+
+<div class="page" id="page-review">
+  <div class="nav-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div class="nav-title">对话复盘</div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="report-section">
+    <div class="report-title">✅ 正确使用 (2)</div>
+    <div class="word-tag-list">
+      <span class="word-tag correct">abandon ✓</span>
+      <span class="word-tag correct">ability ✓</span>
+    </div>
+  </div>
+  <div class="report-section">
+    <div class="report-title">❌ 使用错误 (1)</div>
+    <div class="word-tag-list">
+      <span class="word-tag wrong">absolute ✗</span>
+    </div>
+  </div>
+  <div class="report-section">
+    <div class="report-title">🤖 AI提到但未使用 (2)</div>
+    <div class="word-tag-list">
+      <span class="word-tag ai">absorb</span>
+      <span class="word-tag ai">abstract</span>
+    </div>
+  </div>
+  <div class="report-section">
+    <div class="report-title">📝 错误汇总</div>
+    <div class="error-item">
+      <div class="error-original">"The weather is absolute cold."</div>
+      <div class="error-correct">"The weather is absolutely cold."</div>
+      <div class="error-note">absolute 是形容词，修饰形容词需用副词 absolutely</div>
+    </div>
+  </div>
+  <button class="btn-primary" style="margin-bottom:10px;">加入优先复习</button>
+  <button class="btn-secondary" onclick="goPage('page-home')">返回首页</button>
+</div>
+
+<div class="page" id="page-favorites">
+  <div class="nav-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div class="nav-title">生词本</div>
+    <div style="width:36px;"></div>
+  </div>
+  <div style="display:flex; gap:8px; margin-bottom:14px;">
+    <button class="btn-primary" style="flex:1; font-size:14px; padding:12px;">全选</button>
+    <button class="btn-secondary" style="flex:1; font-size:14px; padding:12px;">发起AI对话</button>
+  </div>
+  <div class="word-list-item">
+    <div class="word-list-check checked"></div>
+    <div class="word-list-text"><div class="word-list-word">abandon</div><div class="word-list-mean">v. 抛弃，放弃</div></div>
+  </div>
+  <div class="word-list-item">
+    <div class="word-list-check checked"></div>
+    <div class="word-list-text"><div class="word-list-word">absolute</div><div class="word-list-mean">adj. 绝对的；完全的</div></div>
+  </div>
+  <div class="word-list-item">
+    <div class="word-list-check"></div>
+    <div class="word-list-text"><div class="word-list-word">abstract</div><div class="word-list-mean">adj. 抽象的；n. 摘要</div></div>
+  </div>
+</div>
+
+<div class="page" id="page-stats">
+  <div class="nav-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div class="nav-title">数据统计</div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">学习趋势</div>
+    <div class="chart-placeholder">[学习趋势图表占位]</div>
+  </div>
+  <div class="card">
+    <div class="section-title">对话练习统计</div>
+    <div class="stat-row" style="margin-bottom:0;">
+      <div class="stat-card" style="border:none; background:var(--surface2);"><div class="stat-num">12</div><div class="stat-label">总对话次数</div></div>
+      <div class="stat-card" style="border:none; background:var(--surface2);"><div class="stat-num">86%</div><div class="stat-label">单词使用率</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-settings">
+  <div class="nav-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div class="nav-title">设置</div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="setting-item">
+    <div><div style="font-weight:600;">英音 / 美音</div><div style="font-size:13px; color:var(--text2);">美音</div></div>
+    <div class="toggle on"></div>
+  </div>
+  <div class="setting-item">
+    <div><div style="font-weight:600;">自动播放发音</div></div>
+    <div class="toggle on"></div>
+  </div>
+  <div class="setting-item">
+    <div><div style="font-weight:600;">学习提醒</div><div style="font-size:13px; color:var(--text2);">每日 20:00</div></div>
+    <div class="toggle"></div>
+  </div>
+  <div class="setting-item">
+    <div style="font-weight:600; color:var(--danger);">重置学习进度</div>
+    <div style="color:var(--text2);">›</div>
+  </div>
+</div>
+
+<div class="page" id="page-history">
+  <div class="nav-header">
+    <div class="back-btn" onclick="goPage('page-home')">‹</div>
+    <div class="nav-title">对话记录</div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="card" onclick="goPage('page-review')">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <span class="badge">今日</span>
+      <span style="font-size:12px; color:var(--text2);">14:32</span>
+    </div>
+    <div style="font-weight:700; margin-bottom:4px;">四级核心词 - 第12轮</div>
+    <div style="font-size:13px; color:var(--text2);">对话 5 轮 · 单词使用率 80% · 错误 1 个</div>
+  </div>
+  <div class="card" onclick="goPage('page-review')">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <span class="badge" style="background:rgba(156,163,175,0.1); color:#9CA3AF;">昨天</span>
+      <span style="font-size:12px; color:var(--text2);">19:15</span>
+    </div>
+    <div style="font-weight:700; margin-bottom:4px;">四级核心词 - 第11轮</div>
+    <div style="font-size:13px; color:var(--text2);">对话 8 轮 · 单词使用率 75% · 错误 2 个</div>
+  </div>
+</div>
+
+<div class="bottom-nav" id="bottom-nav">
+  <div class="nav-item active" onclick="goPage('page-home')"><div class="nav-item-icon">🏠</div><div>首页</div></div>
+  <div class="nav-item" onclick="goPage('page-books')"><div class="nav-item-icon">📚</div><div>词书</div></div>
+  <div class="nav-item" onclick="goPage('page-favorites')"><div class="nav-item-icon">⭐</div><div>生词</div></div>
+  <div class="nav-item" onclick="goPage('page-stats')"><div class="nav-item-icon">📊</div><div>统计</div></div>
+</div>
+
+<script>
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  const noNavPages = ['page-study','page-chat','page-complete','page-review','page-settings','page-history'];
+  document.getElementById('bottom-nav').style.display = noNavPages.includes(id) ? 'none' : 'flex';
+}
+function nextWord() { alert('标记完成，切换至下一张卡片'); }
+function showComplete() { goPage('page-complete'); }
+function toggleDetail() {
+  const el = document.getElementById('word-detail');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>
