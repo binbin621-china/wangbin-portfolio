@@ -18,19 +18,31 @@
     --danger: #FF6B6B;
     --warning: #FFB347;
     --success: #2DD4A8;
+    --accent: #60A5FA;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text); width:100%; max-width:430px; margin:0 auto; min-height:100vh; overflow-x:hidden; }
   .page { display:none; padding:20px 16px 100px; animation: fadeIn 0.35s ease; }
   .page.active { display:block; }
   @keyframes fadeIn { from { opacity:0; transform: translateY(12px);} to { opacity:1; transform: translateY(0);} }
+  @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
+  @keyframes wave { 0%{height:4px;} 50%{height:16px;} 100%{height:4px;} }
+  @keyframes flipIn { from { transform: rotateY(90deg); opacity:0; } to { transform: rotateY(0); opacity:1; } }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+  @keyframes typing { from { width: 0; } to { width: 100%; } }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
   .nav-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
   .nav-title { font-size:18px; font-weight:700; }
   .back-btn { width:36px; height:36px; border-radius:50%; background:var(--card); display:flex; align-items:center; justify-content:center; box-shadow: var(--shadow); cursor:pointer; }
   .card { background:var(--card); border-radius:var(--radius); padding:20px; box-shadow: var(--shadow); margin-bottom:16px; }
-  .btn-primary { width:100%; padding:16px; border-radius:16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; font-size:17px; font-weight:700; border:none; cursor:pointer; box-shadow: 0 8px 24px rgba(45,212,168,0.35); }
+  .btn-primary { width:100%; padding:16px; border-radius:16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color:#fff; font-size:17px; font-weight:700; border:none; cursor:pointer; box-shadow: 0 8px 24px rgba(45,212,168,0.35); transition: transform 0.2s; }
+  .btn-primary:active { transform: scale(0.98); }
   .btn-secondary { width:100%; padding:14px; border-radius:14px; background:var(--card); color:var(--primary-dark); font-size:15px; font-weight:600; border:2px solid var(--border); cursor:pointer; }
   .badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; background: rgba(45,212,168,0.12); color: var(--primary-dark); }
+  .toast { position:fixed; top:60px; left:50%; transform:translateX(-50%) translateY(-20px); background:rgba(31,41,55,0.9); color:#fff; padding:10px 20px; border-radius:24px; font-size:14px; opacity:0; pointer-events:none; transition:all 0.3s; z-index:1000; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
   /* 首页 */
   .home-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
@@ -38,7 +50,8 @@
   .streak { display:flex; align-items:center; gap:6px; font-size:14px; color:var(--text2); }
   .streak-icon { color: #FFB347; font-size:16px; }
   .stat-row { display:flex; gap:12px; margin-bottom:20px; }
-  .stat-card { flex:1; background:var(--card); border-radius:var(--radius); padding:16px; box-shadow: var(--shadow); text-align:center; }
+  .stat-card { flex:1; background:var(--card); border-radius:var(--radius); padding:16px; box-shadow: var(--shadow); text-align:center; transition: transform 0.2s; }
+  .stat-card:active { transform: scale(0.97); }
   .stat-num { font-size:24px; font-weight:800; color:var(--primary-dark); }
   .stat-label { font-size:12px; color:var(--text2); margin-top:4px; }
   .home-main-btn { margin: 8px 0 20px; }
@@ -49,41 +62,90 @@
   .book-name { font-weight:700; font-size:15px; }
   .book-meta { font-size:12px; color:var(--text2); margin-top:2px; }
   .quick-actions { display:flex; gap:10px; }
-  .qa-btn { flex:1; background:var(--card); border-radius:16px; padding:14px; text-align:center; box-shadow: var(--shadow); cursor:pointer; }
+  .qa-btn { flex:1; background:var(--card); border-radius:16px; padding:14px; text-align:center; box-shadow: var(--shadow); cursor:pointer; transition: transform 0.2s; }
+  .qa-btn:active { transform: scale(0.95); }
   .qa-icon { font-size:22px; margin-bottom:6px; }
   .qa-label { font-size:12px; color:var(--text2); }
+  .calendar-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; text-align:center; }
+  .cal-day { font-size:11px; color:var(--text2); margin-bottom:4px; }
+  .cal-cell { aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; background:var(--card); }
+  .cal-cell.done { background: var(--primary); color:#fff; }
+  .cal-cell.half { background: rgba(45,212,168,0.3); color:var(--primary-dark); }
+  .achievements { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+  .achieve-item { min-width:70px; text-align:center; }
+  .achieve-icon { width:48px; height:48px; border-radius:50%; background: linear-gradient(135deg, #FFD700, #FFB347); display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 6px; }
+  .achieve-label { font-size:11px; color:var(--text2); }
+  .recent-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .recent-item:last-child { border-bottom:none; }
+  .recent-dot { width:8px; height:8px; border-radius:50%; background:var(--primary); }
+  .recent-text { flex:1; font-size:14px; }
+  .recent-time { font-size:12px; color:var(--text2); }
 
   /* 词书选择 */
   .search-box { width:100%; padding:12px 16px; border-radius:14px; border:2px solid var(--border); background:var(--card); font-size:15px; outline:none; margin-bottom:16px; }
   .tag-row { display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; }
   .tag { padding:8px 14px; border-radius:20px; background:var(--card); font-size:13px; color:var(--text2); white-space:nowrap; cursor:pointer; border:2px solid transparent; }
   .tag.active { border-color: var(--primary); color: var(--primary-dark); font-weight:600; }
-  .book-list-item { display:flex; align-items:center; gap:14px; padding:16px; background:var(--card); border-radius:var(--radius); margin-bottom:12px; box-shadow: var(--shadow); }
+  .book-list-item { display:flex; align-items:center; gap:14px; padding:16px; background:var(--card); border-radius:var(--radius); margin-bottom:12px; box-shadow: var(--shadow); cursor:pointer; transition: transform 0.2s; }
+  .book-list-item:active { transform: scale(0.98); }
   .book-list-icon { width:48px; height:48px; border-radius:12px; background: linear-gradient(135deg, var(--primary), #3B82F6); display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; }
   .book-list-info { flex:1; }
   .book-progress { width:100%; height:6px; background:#E5F4EF; border-radius:3px; margin-top:8px; overflow:hidden; }
-  .book-progress-bar { height:100%; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); border-radius:3px; }
+  .book-progress-bar { height:100%; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); border-radius:3px; transition: width 0.5s; }
 
   /* 单词卡片 */
+  .mode-tabs { display:flex; gap:8px; margin-bottom:16px; }
+  .mode-tab { flex:1; padding:10px; border-radius:12px; background:var(--card); border:2px solid var(--border); text-align:center; font-size:13px; font-weight:600; color:var(--text2); cursor:pointer; }
+  .mode-tab.active { border-color:var(--primary); color:var(--primary-dark); background:rgba(45,212,168,0.06); }
   .progress-bar-outer { width:100%; height:8px; background:#E5F4EF; border-radius:4px; margin-bottom:20px; overflow:hidden; }
   .progress-bar-inner { height:100%; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); border-radius:4px; transition: width 0.3s; }
-  .word-card { background:var(--card); border-radius:var(--radius); padding:40px 24px; text-align:center; box-shadow: var(--shadow); margin-bottom:24px; position:relative; }
+  .flip-card { perspective: 1000px; margin-bottom:24px; }
+  .flip-inner { position:relative; width:100%; transition: transform 0.6s; transform-style: preserve-3d; }
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back { backface-visibility: hidden; border-radius:var(--radius); background:var(--card); box-shadow: var(--shadow); padding:40px 24px; text-align:center; }
+  .flip-back { position:absolute; top:0; left:0; right:0; transform: rotateY(180deg); }
   .word-text { font-size:36px; font-weight:800; margin-bottom:8px; }
   .word-phonetic { font-size:16px; color:var(--text2); margin-bottom:12px; }
   .word-meaning { font-size:18px; color:var(--text2); }
-  .speaker-btn { width:48px; height:48px; border-radius:50%; background: rgba(45,212,168,0.12); display:flex; align-items:center; justify-content:center; margin:16px auto 0; cursor:pointer; color: var(--primary-dark); font-size:20px; }
+  .speaker-btn { width:48px; height:48px; border-radius:50%; background: rgba(45,212,168,0.12); display:flex; align-items:center; justify-content:center; margin:16px auto 0; cursor:pointer; color: var(--primary-dark); font-size:20px; transition: transform 0.2s; }
+  .speaker-btn:active { transform: scale(0.9); }
   .action-btns { display:flex; gap:10px; }
-  .action-btn { flex:1; padding:14px; border-radius:14px; border:none; font-size:15px; font-weight:700; cursor:pointer; }
+  .action-btn { flex:1; padding:14px; border-radius:14px; border:none; font-size:15px; font-weight:700; cursor:pointer; transition: transform 0.2s; }
+  .action-btn:active { transform: scale(0.95); }
   .btn-know { background: var(--success); color:#fff; }
   .btn-vague { background: var(--warning); color:#fff; }
   .btn-unknow { background: var(--danger); color:#fff; }
   .detail-link { text-align:center; margin-top:16px; font-size:13px; color:var(--text2); cursor:pointer; }
+  .word-detail { display:none; margin-top:12px; padding:16px; background:var(--card); border-radius:var(--radius); font-size:14px; color:var(--text2); line-height:1.8; animation: fadeIn 0.3s; }
+  .detail-section { margin-bottom:12px; }
+  .detail-section-title { font-weight:700; color:var(--primary-dark); margin-bottom:4px; }
+  .example-sentence { padding:8px 12px; background:var(--bg); border-radius:8px; margin-bottom:6px; cursor:pointer; transition: background 0.2s; }
+  .example-sentence:active { background: var(--border); }
+  .spell-input { width:100%; padding:16px; border-radius:14px; border:2px solid var(--border); background:var(--card); font-size:20px; text-align:center; letter-spacing:4px; font-weight:700; outline:none; margin-bottom:16px; }
+  .spell-hint { display:flex; gap:6px; justify-content:center; margin-bottom:16px; flex-wrap:wrap; }
+  .spell-letter { width:36px; height:44px; border-radius:8px; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; background:var(--card); }
+  .spell-letter.filled { border-color:var(--primary); background:rgba(45,212,168,0.1); }
+  .spell-letter.error { border-color:var(--danger); background:rgba(255,107,107,0.1); animation: shake 0.4s; }
+  .choice-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:16px; }
+  .choice-btn { padding:14px; border-radius:12px; border:2px solid var(--border); background:var(--card); font-size:15px; font-weight:600; cursor:pointer; transition: all 0.2s; }
+  .choice-btn:active { transform: scale(0.97); }
+  .choice-btn.correct { border-color:var(--success); background:rgba(45,212,168,0.1); color:var(--success); }
+  .choice-btn.wrong { border-color:var(--danger); background:rgba(255,107,107,0.1); color:var(--danger); animation: shake 0.4s; }
+
+  /* 学习完成弹窗 */
+  .complete-anim { text-align:center; padding:40px 20px; }
+  .complete-circle { width:100px; height:100px; border-radius:50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:48px; animation: pulse 0.6s ease-in-out; }
+  .complete-stats { display:flex; gap:16px; justify-content:center; margin:24px 0; }
+  .complete-stat { text-align:center; }
+  .complete-stat-num { font-size:28px; font-weight:800; color:var(--primary-dark); }
+  .complete-stat-label { font-size:12px; color:var(--text2); }
 
   /* AI对话 */
   .chat-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-  .chat-pool { background: rgba(45,212,168,0.08); border-radius:12px; padding:10px 14px; font-size:13px; color:var(--text2); margin-bottom:12px; }
+  .chat-pool { background: rgba(45,212,168,0.08); border-radius:12px; padding:10px 14px; font-size:13px; color:var(--text2); margin-bottom:12px; cursor:pointer; transition: max-height 0.3s; overflow:hidden; }
+  .chat-pool.collapsed { max-height:40px; }
   .chat-area { background:var(--card); border-radius:var(--radius); padding:16px; min-height:380px; max-height:460px; overflow-y:auto; margin-bottom:12px; }
-  .msg { display:flex; margin-bottom:14px; }
+  .msg { display:flex; margin-bottom:14px; animation: fadeIn 0.3s; }
   .msg.ai { justify-content:flex-start; }
   .msg.user { justify-content:flex-end; }
   .msg-bubble { max-width:78%; padding:12px 16px; border-radius:18px; font-size:15px; line-height:1.5; position:relative; }
@@ -92,9 +154,24 @@
   .msg-voice { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; margin-top:6px; }
   .msg.ai .msg-voice { background:#E5F4EF; color:var(--primary-dark); margin-left:4px; }
   .msg.user .msg-voice { background:rgba(255,255,255,0.25); color:#fff; margin-right:4px; }
+  .msg-correction { font-size:12px; color:var(--danger); margin-top:4px; margin-left:4px; }
+  .msg-correction.good { color:var(--success); }
+  .typing-indicator { display:flex; gap:4px; padding:12px 16px; }
+  .typing-dot { width:8px; height:8px; border-radius:50%; background:var(--text2); animation: typingBounce 1.4s infinite; }
+  .typing-dot:nth-child(2){ animation-delay:0.2s; }
+  .typing-dot:nth-child(3){ animation-delay:0.4s; }
+  @keyframes typingBounce { 0%,60%,100%{transform:translateY(0);} 30%{transform:translateY(-8px);} }
+  .wave-bar { display:inline-block; width:3px; background:var(--primary); border-radius:2px; animation: wave 1s infinite; margin:0 1px; }
+  .wave-bar:nth-child(2){ animation-delay:0.1s; }
+  .wave-bar:nth-child(3){ animation-delay:0.2s; }
+  .wave-bar:nth-child(4){ animation-delay:0.3s; }
+  .wave-bar:nth-child(5){ animation-delay:0.4s; }
   .chat-input-area { display:flex; align-items:center; gap:10px; }
-  .mic-btn { width:56px; height:56px; border-radius:50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:24px; border:none; cursor:pointer; box-shadow: 0 6px 20px rgba(45,212,168,0.35); }
+  .mic-btn { width:56px; height:56px; border-radius:50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:24px; border:none; cursor:pointer; box-shadow: 0 6px 20px rgba(45,212,168,0.35); transition: transform 0.2s; }
+  .mic-btn:active { transform: scale(0.92); }
+  .mic-btn.recording { animation: pulse 1.5s infinite; background: linear-gradient(135deg, var(--danger), #DC2626); }
   .chat-text-input { flex:1; padding:14px 16px; border-radius:16px; border:2px solid var(--border); background:var(--card); font-size:15px; outline:none; }
+  .send-btn { padding:12px 18px; border-radius:14px; background:var(--primary); color:#fff; border:none; font-weight:700; cursor:pointer; }
 
   /* 复盘 */
   .report-section { margin-bottom:20px; }
@@ -108,17 +185,29 @@
   .error-original { text-decoration: line-through; color: var(--danger); font-size:14px; }
   .error-correct { color: var(--success); font-size:15px; font-weight:700; margin-top:4px; }
   .error-note { font-size:13px; color:var(--text2); margin-top:4px; }
+  .radar-placeholder { width:100%; height:200px; background: linear-gradient(135deg, #E5F4EF, #F0F9F6); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; color:var(--text2); font-size:14px; margin-bottom:16px; }
+  .skill-bar { margin-bottom:10px; }
+  .skill-label { display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px; }
+  .skill-track { height:8px; background:#E5F4EF; border-radius:4px; overflow:hidden; }
+  .skill-fill { height:100%; border-radius:4px; transition: width 0.6s; }
 
   /* 生词本 */
-  .word-list-item { display:flex; align-items:center; gap:12px; padding:14px; background:var(--card); border-radius:14px; margin-bottom:10px; box-shadow: var(--shadow); }
-  .word-list-check { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); cursor:pointer; }
+  .word-list-item { display:flex; align-items:center; gap:12px; padding:14px; background:var(--card); border-radius:14px; margin-bottom:10px; box-shadow: var(--shadow); cursor:pointer; transition: transform 0.2s; }
+  .word-list-item:active { transform: scale(0.98); }
+  .word-list-check { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; color:#fff; }
   .word-list-check.checked { background:var(--primary); border-color:var(--primary); }
   .word-list-text { flex:1; }
   .word-list-word { font-weight:700; font-size:15px; }
   .word-list-mean { font-size:13px; color:var(--text2); }
+  .word-list-tag { padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+  .word-list-tag.new { background:rgba(45,212,168,0.12); color:var(--primary-dark); }
+  .word-list-tag.review { background:rgba(255,179,71,0.12); color:#D97706; }
 
   /* 统计 */
-  .chart-placeholder { width:100%; height:180px; background: linear-gradient(135deg, #E5F4EF, #F0F9F6); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; color:var(--text2); font-size:14px; margin-bottom:16px; }
+  .chart-container { width:100%; height:220px; background:var(--card); border-radius:var(--radius); padding:16px; box-shadow: var(--shadow); margin-bottom:16px; }
+  .chart-tabs { display:flex; gap:8px; margin-bottom:12px; }
+  .chart-tab { padding:6px 14px; border-radius:12px; font-size:13px; font-weight:600; background:#F0F9F6; color:var(--text2); cursor:pointer; border:none; }
+  .chart-tab.active { background:var(--primary); color:#fff; }
   .setting-item { display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--card); border-radius:14px; margin-bottom:10px; }
   .toggle { width:50px; height:28px; border-radius:14px; background:#E5E7EB; position:relative; cursor:pointer; transition:0.3s; }
   .toggle.on { background: var(--primary); }
@@ -133,7 +222,9 @@
 </head>
 <body>
 
-<!-- 首页 -->
+<div class="toast" id="toast"></div>
+
+<!-- ==================== 首页 ==================== -->
 <div class="page active" id="page-home">
   <div class="home-header">
     <div style="display:flex; align-items:center; gap:10px;">
@@ -145,30 +236,47 @@
     </div>
     <div class="back-btn" onclick="goPage('page-settings')">⚙</div>
   </div>
+
   <div class="stat-row">
-    <div class="stat-card">
-      <div class="stat-num">15</div>
+    <div class="stat-card" onclick="goPage('page-stats')">
+      <div class="stat-num" id="stat-today">15</div>
       <div class="stat-label">今日已学</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-num">20</div>
+    <div class="stat-card" onclick="goPage('page-stats')">
+      <div class="stat-num" id="stat-review">20</div>
       <div class="stat-label">待复习</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-num">3</div>
+    <div class="stat-card" onclick="goPage('page-stats')">
+      <div class="stat-num" id="stat-chat">3</div>
       <div class="stat-label">对话练习</div>
     </div>
   </div>
-  <button class="btn-primary home-main-btn" onclick="goPage('page-study')">开始学习</button>
-  <div class="section-title">📘 当前词书</div>
+
+  <button class="btn-primary home-main-btn" onclick="startStudy()">开始学习</button>
+
+  <div class="section-title">📅 本月打卡</div>
+  <div class="card">
+    <div class="calendar-grid" id="calendar"></div>
+  </div>
+
+  <div class="section-title">🏆 最近成就</div>
+  <div class="achievements">
+    <div class="achieve-item"><div class="achieve-icon">🔥</div><div class="achieve-label">7天打卡</div></div>
+    <div class="achieve-item"><div class="achieve-icon">💬</div><div class="achieve-label">首次对话</div></div>
+    <div class="achieve-item"><div class="achieve-icon">🎯</div><div class="achieve-label">100词</div></div>
+    <div class="achieve-item"><div class="achieve-icon">⭐</div><div class="achieve-label">全对复盘</div></div>
+  </div>
+
+  <div class="section-title" style="margin-top:16px;">📘 当前词书</div>
   <div class="card book-card" onclick="goPage('page-books')">
     <div class="book-icon">📖</div>
     <div class="book-info">
       <div class="book-name">四级核心词汇</div>
-      <div class="book-meta">已学 450 / 2380 词</div>
+      <div class="book-meta">已学 450 / 2380 词 · 预计还需 32 天</div>
     </div>
     <div style="color:var(--text2);">›</div>
   </div>
+
   <div class="section-title">⚡ 快捷入口</div>
   <div class="quick-actions">
     <div class="qa-btn" onclick="goPage('page-favorites')">
@@ -184,211 +292,440 @@
       <div class="qa-label">数据统计</div>
     </div>
   </div>
+
+  <div class="section-title" style="margin-top:16px;">🕐 最近动态</div>
+  <div class="card">
+    <div class="recent-item">
+      <div class="recent-dot"></div>
+      <div class="recent-text">完成四级核心词第12轮学习</div>
+      <div class="recent-time">14:32</div>
+    </div>
+    <div class="recent-item">
+      <div class="recent-dot" style="background:var(--warning);"></div>
+      <div class="recent-text">AI对话练习 · 使用单词 8/10</div>
+      <div class="recent-time">14:45</div>
+    </div>
+    <div class="recent-item">
+      <div class="recent-dot" style="background:var(--accent);"></div>
+      <div class="recent-text">加入优先复习 3 个单词</div>
+      <div class="recent-time">14:50</div>
+    </div>
+  </div>
 </div>
 
-<!-- 词书选择 -->
+<!-- ==================== 词书选择 ==================== -->
 <div class="page" id="page-books">
   <div class="nav-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
     <div class="nav-title">选择词书</div>
     <div style="width:36px;"></div>
   </div>
-  <input class="search-box" placeholder="搜索词书...">
+  <input class="search-box" placeholder="搜索词书..." oninput="filterBooks(this.value)">
   <div class="tag-row">
-    <div class="tag active">全部</div>
-    <div class="tag">中小学</div>
-    <div class="tag">大学应试</div>
-    <div class="tag">出国</div>
-    <div class="tag">日常口语</div>
+    <div class="tag active" onclick="setTag(this)">全部</div>
+    <div class="tag" onclick="setTag(this)">中小学</div>
+    <div class="tag" onclick="setTag(this)">大学应试</div>
+    <div class="tag" onclick="setTag(this)">出国</div>
+    <div class="tag" onclick="setTag(this)">日常口语</div>
   </div>
-  <div class="book-list-item">
-    <div class="book-list-icon">📗</div>
-    <div class="book-list-info">
-      <div style="font-weight:700;">四级核心词汇</div>
-      <div style="font-size:12px; color:var(--text2); margin-top:2px;">2380 词</div>
-      <div class="book-progress"><div class="book-progress-bar" style="width:19%;"></div></div>
+  <div id="book-list">
+    <div class="book-list-item" data-tag="大学应试">
+      <div class="book-list-icon">📗</div>
+      <div class="book-list-info">
+        <div style="font-weight:700;">四级核心词汇</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:2px;">2380 词 · 大学应试</div>
+        <div class="book-progress"><div class="book-progress-bar" style="width:19%;"></div></div>
+      </div>
+      <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px;">学习中</button>
     </div>
-    <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px;">学习中</button>
-  </div>
-  <div class="book-list-item">
-    <div class="book-list-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">📙</div>
-    <div class="book-list-info">
-      <div style="font-weight:700;">六级高频词汇</div>
-      <div style="font-size:12px; color:var(--text2); margin-top:2px;">1860 词</div>
-      <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+    <div class="book-list-item" data-tag="大学应试">
+      <div class="book-list-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">📙</div>
+      <div class="book-list-info">
+        <div style="font-weight:700;">六级高频词汇</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:2px;">1860 词 · 大学应试</div>
+        <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+      </div>
+      <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; color:var(--text2); border-color:#E5E7EB;">选择</button>
     </div>
-    <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; color:var(--text2); border-color:#E5E7EB;">选择</button>
-  </div>
-  <div class="book-list-item">
-    <div class="book-list-icon" style="background: linear-gradient(135deg, #EC4899, #BE185D);">📕</div>
-    <div class="book-list-info">
-      <div style="font-weight:700;">雅思核心词汇</div>
-      <div style="font-size:12px; color:var(--text2); margin-top:2px;">3500 词</div>
-      <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+    <div class="book-list-item" data-tag="出国">
+      <div class="book-list-icon" style="background: linear-gradient(135deg, #EC4899, #BE185D);">📕</div>
+      <div class="book-list-info">
+        <div style="font-weight:700;">雅思核心词汇</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:2px;">3500 词 · 出国</div>
+        <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+      </div>
+      <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; color:var(--text2); border-color:#E5E7EB;">选择</button>
     </div>
-    <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; color:var(--text2); border-color:#E5E7EB;">选择</button>
+    <div class="book-list-item" data-tag="出国">
+      <div class="book-list-icon" style="background: linear-gradient(135deg, #3B82F6, #1D4ED8);">📘</div>
+      <div class="book-list-info">
+        <div style="font-weight:700;">托福核心词汇</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:2px;">4200 词 · 出国</div>
+        <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+      </div>
+      <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; color:var(--text2); border-color:#E5E7EB;">选择</button>
+    </div>
+    <div class="book-list-item" data-tag="日常口语">
+      <div class="book-list-icon" style="background: linear-gradient(135deg, #10B981, #059669);">📓</div>
+      <div class="book-list-info">
+        <div style="font-weight:700;">日常口语500句</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:2px;">500 词 · 日常口语</div>
+        <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+      </div>
+      <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; color:var(--text2); border-color:#E5E7EB;">选择</button>
+    </div>
+    <div class="book-list-item" data-tag="中小学">
+      <div class="book-list-icon" style="background: linear-gradient(135deg, #8B5CF6, #6D28D9);">📔</div>
+      <div class="book-list-info">
+        <div style="font-weight:700;">中考必备词汇</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:2px;">1600 词 · 中小学</div>
+        <div class="book-progress"><div class="book-progress-bar" style="width:0%;"></div></div>
+      </div>
+      <button class="btn-secondary" style="width:auto; padding:8px 16px; font-size:13px; color:var(--text2); border-color:#E5E7EB;">选择</button>
+    </div>
   </div>
 </div>
 
-<!-- 单词学习 -->
+<!-- ==================== 单词学习 ==================== -->
 <div class="page" id="page-study">
   <div class="nav-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
-    <div style="font-size:15px; font-weight:700;">进度：12/30</div>
+    <div style="font-size:15px; font-weight:700;">进度：<span id="study-progress-text">1/10</span></div>
     <div style="width:36px;"></div>
   </div>
-  <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:40%;"></div></div>
-  <div class="word-card">
-    <div class="word-text">abandon</div>
-    <div class="word-phonetic">/əˈbændən/</div>
-    <div class="word-meaning">v. 抛弃，放弃</div>
-    <div class="speaker-btn">🔊</div>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="study-progress-bar" style="width:10%;"></div></div>
+
+  <div class="mode-tabs">
+    <div class="mode-tab active" onclick="setMode(0)">看英猜中</div>
+    <div class="mode-tab" onclick="setMode(1)">看中猜英</div>
+    <div class="mode-tab" onclick="setMode(2)">听音选义</div>
+    <div class="mode-tab" onclick="setMode(3)">拼写</div>
   </div>
-  <div class="action-btns">
-    <button class="action-btn btn-unknow" onclick="nextWord()">不认识</button>
-    <button class="action-btn btn-vague" onclick="nextWord()">模糊</button>
-    <button class="action-btn btn-know" onclick="showComplete()">认识</button>
+
+  <div id="study-card-area">
+    <div class="flip-card" id="flip-card" onclick="flipCard()">
+      <div class="flip-inner" id="flip-inner">
+        <div class="flip-front">
+          <div class="word-text" id="word-text">abandon</div>
+          <div class="word-phonetic" id="word-phonetic">/əˈbændən/</div>
+          <div class="word-meaning" style="opacity:0.3;">点击翻转查看释义</div>
+          <div class="speaker-btn" onclick="event.stopPropagation(); playAudio()">🔊</div>
+        </div>
+        <div class="flip-back">
+          <div class="word-text" id="word-text-back">abandon</div>
+          <div class="word-meaning" id="word-meaning">v. 抛弃，放弃<br>n. 放任，狂热</div>
+          <div class="speaker-btn" onclick="event.stopPropagation(); playAudio()">🔊</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-btns" id="action-btns">
+      <button class="action-btn btn-unknow" onclick="nextWord(0)">不认识</button>
+      <button class="action-btn btn-vague" onclick="nextWord(1)">模糊</button>
+      <button class="action-btn btn-know" onclick="nextWord(2)">认识</button>
+    </div>
   </div>
+
+  <div id="choice-area" style="display:none;">
+    <div class="card" style="text-align:center; padding:30px;">
+      <div style="font-size:18px; font-weight:700; margin-bottom:8px;" id="choice-question">选择正确释义</div>
+      <div class="word-text" id="choice-word" style="margin-bottom:20px;">abandon</div>
+    </div>
+    <div class="choice-grid" id="choice-grid">
+      <button class="choice-btn" onclick="checkChoice(this, false)">坚持，维持</button>
+      <button class="choice-btn" onclick="checkChoice(this, true)">抛弃，放弃</button>
+      <button class="choice-btn" onclick="checkChoice(this, false)">接受，同意</button>
+      <button class="choice-btn" onclick="checkChoice(this, false)">改善，提高</button>
+    </div>
+  </div>
+
+  <div id="spell-area" style="display:none;">
+    <div class="card" style="text-align:center; padding:30px;">
+      <div style="font-size:16px; color:var(--text2); margin-bottom:8px;">根据中文释义拼写单词</div>
+      <div style="font-size:20px; font-weight:700; margin-bottom:20px;">v. 抛弃，放弃</div>
+      <div class="spell-hint" id="spell-hint">
+        <div class="spell-letter">a</div><div class="spell-letter"></div><div class="spell-letter">a</div><div class="spell-letter"></div>
+        <div class="spell-letter">d</div><div class="spell-letter"></div><div class="spell-letter">n</div>
+      </div>
+      <input class="spell-input" id="spell-input" placeholder="输入完整单词" maxlength="7" onkeyup="checkSpell(event)">
+    </div>
+  </div>
+
   <div class="detail-link" onclick="toggleDetail()">查看详情 ›</div>
-  <div id="word-detail" style="display:none; margin-top:12px; padding:16px; background:var(--card); border-radius:var(--radius); font-size:14px; color:var(--text2); line-height:1.8;">
-    <b>词根：</b>ab-（离开）+ bandon（权力）<br>
-    <b>例句：</b>They had to abandon their car in the snow.<br>
-    <b>变形：</b>abandoned, abandoning
+  <div class="word-detail" id="word-detail">
+    <div class="detail-section">
+      <div class="detail-section-title">📌 词根词缀</div>
+      <div>ab-（离开）+ bandon（权力）→ 放弃权力 → 抛弃，放弃</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">📝 例句</div>
+      <div class="example-sentence" onclick="playAudio()">🔊 They had to abandon their car in the snow.</div>
+      <div class="example-sentence" onclick="playAudio()">🔊 The baby was abandoned on the hospital steps.</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">🔗 同反义词</div>
+      <div>同义：desert, forsake, leave &nbsp;|&nbsp; 反义：retain, keep, maintain</div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">🎯 常见搭配</div>
+      <div>abandon oneself to 沉溺于 | with abandon 放纵地</div>
+    </div>
   </div>
 </div>
 
-<!-- 学习完成弹窗 -->
+<!-- ==================== 学习完成 ==================== -->
 <div class="page" id="page-complete">
-  <div style="display:flex; align-items:center; justify-content:center; min-height:60vh; flex-direction:column; text-align:center; padding:20px;">
-    <div style="font-size:64px; margin-bottom:16px;">🎉</div>
-    <h2 style="margin-bottom:8px;">本轮单词学习完成</h2>
-    <p style="color:var(--text2); font-size:15px; line-height:1.6; margin-bottom:28px;">一共学习 <b>30</b> 个单词<br>要不要开启AI对话，用刚学的单词练口语？</p>
-    <button class="btn-primary" style="margin-bottom:12px;" onclick="goPage('page-chat')">开始对话练习</button>
+  <div class="complete-anim">
+    <div class="complete-circle">🎉</div>
+    <h2 style="margin-bottom:8px;">本轮学习完成！</h2>
+    <p style="color:var(--text2); font-size:15px;">太棒了，坚持学习让英语更流利</p>
+    <div class="complete-stats">
+      <div class="complete-stat">
+        <div class="complete-stat-num" id="complete-count">10</div>
+        <div class="complete-stat-label">学习单词</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-num" id="complete-know">7</div>
+        <div class="complete-stat-label">已掌握</div>
+      </div>
+      <div class="complete-stat">
+        <div class="complete-stat-num" id="complete-time">8</div>
+        <div class="complete-stat-label">分钟</div>
+      </div>
+    </div>
+    <p style="color:var(--text2); font-size:15px; line-height:1.6; margin-bottom:24px;">要不要开启AI对话，用刚学的单词练口语？<br>实践是记忆的最佳方式 💪</p>
+    <button class="btn-primary" style="margin-bottom:12px;" onclick="goPage('page-chat')">🎤 开始对话练习</button>
     <button class="btn-secondary" onclick="goPage('page-home')">跳过，返回首页</button>
   </div>
 </div>
 
-<!-- AI对话 -->
+<!-- ==================== AI对话 ==================== -->
 <div class="page" id="page-chat">
   <div class="chat-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
     <div style="font-weight:700;">AI 对话练习</div>
     <button class="btn-secondary" style="width:auto; padding:8px 14px; font-size:13px;" onclick="goPage('page-review')">结束对话</button>
   </div>
-  <div class="chat-pool">💡 本轮词池：abandon, ability, absolute, absorb, abstract...</div>
+  <div class="chat-pool" id="chat-pool" onclick="togglePool()">💡 本轮词池：abandon, ability, absolute, absorb, abstract, abundant, abuse, academic, accelerate, accept <span style="float:right;">▼</span></div>
   <div class="chat-area" id="chat-area">
+    <div style="text-align:center; font-size:12px; color:var(--text2); margin-bottom:12px;">— 今天 14:45 —</div>
     <div class="msg ai">
       <div>
-        <div class="msg-bubble">Hi! Today let's talk about travel. Have you ever had to <b>abandon</b> a trip plan because of bad weather?</div>
-        <div class="msg-voice">▶</div>
+        <div class="msg-bubble">Hi! Today let's talk about travel and decision-making. Have you ever had to <b style="color:var(--primary-dark);">abandon</b> a trip plan because of unexpected circumstances?</div>
+        <div class="msg-voice" onclick="playAudio()">▶</div>
       </div>
     </div>
     <div class="msg user">
       <div style="display:flex; flex-direction:column; align-items:flex-end;">
-        <div class="msg-bubble">Yes, I once abandoned my camping plan because of heavy rain.</div>
-        <div class="msg-voice">▶</div>
+        <div class="msg-bubble">Yes, I once abandoned my camping plan because of heavy rain. It was disappointing.</div>
+        <div class="msg-voice" onclick="playAudio()">▶</div>
       </div>
     </div>
     <div class="msg ai">
       <div>
-        <div class="msg-bubble">That happens! The <b>ability</b> to adapt is important. Do you think you have the ability to handle unexpected situations?</div>
-        <div style="font-size:12px; color:var(--danger); margin-top:4px; margin-left:4px;">💡 小提示：abandoned 是过去式，你的用法正确 ✓</div>
-        <div class="msg-voice">▶</div>
+        <div class="msg-bubble">That happens! The <b style="color:var(--primary-dark);">ability</b> to adapt is truly important. Do you think you have the ability to handle unexpected situations calmly?</div>
+        <div class="msg-correction good">💡 abandoned 是过去式，你的用法正确 ✓</div>
+        <div class="msg-voice" onclick="playAudio()">▶</div>
+      </div>
+    </div>
+    <div class="msg user">
+      <div style="display:flex; flex-direction:column; align-items:flex-end;">
+        <div class="msg-bubble">I think so. I usually try to stay positive and find alternative plans.</div>
+        <div class="msg-voice" onclick="playAudio()">▶</div>
+      </div>
+    </div>
+    <div class="msg ai" id="typing-msg" style="display:none;">
+      <div>
+        <div class="msg-bubble">
+          <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="chat-input-area">
-    <div class="mic-btn">🎤</div>
-    <input class="chat-text-input" placeholder="按住说话或输入文字...">
-    <button style="padding:12px 18px; border-radius:14px; background:var(--primary); color:#fff; border:none; font-weight:700; cursor:pointer;">发送</button>
+  <div style="text-align:center; margin-bottom:8px; display:none;" id="recording-indicator">
+    <div style="font-size:13px; color:var(--danger); margin-bottom:4px;">
+      <span class="wave-bar" style="height:8px;"></span>
+      <span class="wave-bar" style="height:14px;"></span>
+      <span class="wave-bar" style="height:10px;"></span>
+      <span class="wave-bar" style="height:16px;"></span>
+      <span class="wave-bar" style="height:6px;"></span>
+      正在录音...
+    </div>
   </div>
-  <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:8px;">已对话 3/8 轮</div>
+  <div class="chat-input-area">
+    <div class="mic-btn" id="mic-btn" onmousedown="startRecord()" onmouseup="stopRecord()" ontouchstart="startRecord()" ontouchend="stopRecord()">🎤</div>
+    <input class="chat-text-input" id="chat-input" placeholder="按住说话或输入文字..." onkeypress="if(event.key==='Enter') sendMsg()">
+    <button class="send-btn" onclick="sendMsg()">发送</button>
+  </div>
+  <div style="text-align:center; font-size:12px; color:var(--text2); margin-top:8px;">已对话 <span id="chat-round">4</span>/8 轮</div>
 </div>
 
-<!-- 复盘页 -->
+<!-- ==================== 对话复盘 ==================== -->
 <div class="page" id="page-review">
   <div class="nav-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
     <div class="nav-title">对话复盘</div>
     <div style="width:36px;"></div>
   </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div style="font-weight:700;">本次对话表现</div>
+      <div class="badge">B+</div>
+    </div>
+    <div class="radar-placeholder" id="radar-chart">[能力雷达图]</div>
+    <div class="skill-bar">
+      <div class="skill-label"><span>词汇运用</span><span>75%</span></div>
+      <div class="skill-track"><div class="skill-fill" style="width:75%; background:var(--primary);"></div></div>
+    </div>
+    <div class="skill-bar">
+      <div class="skill-label"><span>语法准确</span><span>60%</span></div>
+      <div class="skill-track"><div class="skill-fill" style="width:60%; background:var(--warning);"></div></div>
+    </div>
+    <div class="skill-bar">
+      <div class="skill-label"><span>表达流利</span><span>80%</span></div>
+      <div class="skill-track"><div class="skill-fill" style="width:80%; background:var(--success);"></div></div>
+    </div>
+  </div>
+
   <div class="report-section">
-    <div class="report-title">✅ 正确使用 (2)</div>
+    <div class="report-title">✅ 正确使用 (4)</div>
     <div class="word-tag-list">
       <span class="word-tag correct">abandon ✓</span>
       <span class="word-tag correct">ability ✓</span>
+      <span class="word-tag correct">alternative ✓</span>
+      <span class="word-tag correct">positive ✓</span>
     </div>
   </div>
   <div class="report-section">
-    <div class="report-title">❌ 使用错误 (1)</div>
+    <div class="report-title">❌ 使用错误 (2)</div>
     <div class="word-tag-list">
       <span class="word-tag wrong">absolute ✗</span>
+      <span class="word-tag wrong">academic ✗</span>
     </div>
   </div>
   <div class="report-section">
-    <div class="report-title">🤖 AI提到但未使用 (2)</div>
+    <div class="report-title">🤖 AI提到但未使用 (4)</div>
     <div class="word-tag-list">
       <span class="word-tag ai">absorb</span>
       <span class="word-tag ai">abstract</span>
+      <span class="word-tag ai">abundant</span>
+      <span class="word-tag ai">accelerate</span>
     </div>
   </div>
   <div class="report-section">
-    <div class="report-title">📝 错误汇总</div>
+    <div class="report-title">📝 错误汇总与纠正</div>
     <div class="error-item">
-      <div class="error-original">"The weather is absolute cold."</div>
-      <div class="error-correct">"The weather is absolutely cold."</div>
+      <div class="error-original">❌ "The weather is absolute cold."</div>
+      <div class="error-correct">✅ "The weather is absolutely cold."</div>
       <div class="error-note">absolute 是形容词，修饰形容词需用副词 absolutely</div>
     </div>
+    <div class="error-item">
+      <div class="error-original">❌ "My academic is not good."</div>
+      <div class="error-correct">✅ "My academic performance is not good."</div>
+      <div class="error-note">academic 是形容词，不能直接作主语，需搭配名词 performance</div>
+    </div>
   </div>
-  <button class="btn-primary" style="margin-bottom:10px;">加入优先复习</button>
+
+  <div class="card">
+    <div class="report-title">📊 单词掌握度分布</div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:12px;">
+      <div style="flex:1; height:12px; border-radius:6px; overflow:hidden; display:flex;">
+        <div style="width:40%; background:var(--success);"></div>
+        <div style="width:20%; background:var(--danger);"></div>
+        <div style="width:40%; background:var(--text2);"></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:8px; font-size:12px;">
+      <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--success);"></div>掌握 40%</div>
+      <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--danger);"></div>错误 20%</div>
+      <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--text2);"></div>未使用 40%</div>
+    </div>
+  </div>
+
+  <button class="btn-primary" style="margin-bottom:10px;" onclick="showToast('已加入优先复习清单'); goPage('page-home')">➕ 加入优先复习</button>
   <button class="btn-secondary" onclick="goPage('page-home')">返回首页</button>
 </div>
 
-<!-- 生词本 -->
+<!-- ==================== 生词本 ==================== -->
 <div class="page" id="page-favorites">
   <div class="nav-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
-    <div class="nav-title">生词本</div>
+    <div class="nav-title">生词本 <span style="font-size:14px; color:var(--text2); font-weight:400;">(12)</span></div>
     <div style="width:36px;"></div>
   </div>
+  <div style="display:flex; gap:8px; margin-bottom:14px; overflow-x:auto;">
+    <div class="tag active">全部</div>
+    <div class="tag">新词</div>
+    <div class="tag">待复习</div>
+    <div class="tag">已掌握</div>
+  </div>
   <div style="display:flex; gap:8px; margin-bottom:14px;">
-    <button class="btn-primary" style="flex:1; font-size:14px; padding:12px;">全选</button>
-    <button class="btn-secondary" style="flex:1; font-size:14px; padding:12px;">发起AI对话</button>
+    <button class="btn-primary" style="flex:1; font-size:14px; padding:12px;" onclick="toggleSelectAll()">全选</button>
+    <button class="btn-secondary" style="flex:1; font-size:14px; padding:12px;" onclick="goPage('page-chat')">发起AI对话</button>
   </div>
-  <div class="word-list-item">
-    <div class="word-list-check checked"></div>
-    <div class="word-list-text">
-      <div class="word-list-word">abandon</div>
-      <div class="word-list-mean">v. 抛弃，放弃</div>
+  <div id="fav-list">
+    <div class="word-list-item">
+      <div class="word-list-check checked" onclick="toggleCheck(this)">✓</div>
+      <div class="word-list-text">
+        <div class="word-list-word">abandon <span style="font-size:12px; color:var(--text2); font-weight:400;">/əˈbændən/</span></div>
+        <div class="word-list-mean">v. 抛弃，放弃</div>
+      </div>
+      <span class="word-list-tag new">新词</span>
     </div>
-  </div>
-  <div class="word-list-item">
-    <div class="word-list-check checked"></div>
-    <div class="word-list-text">
-      <div class="word-list-word">absolute</div>
-      <div class="word-list-mean">adj. 绝对的；完全的</div>
+    <div class="word-list-item">
+      <div class="word-list-check checked" onclick="toggleCheck(this)">✓</div>
+      <div class="word-list-text">
+        <div class="word-list-word">absolute <span style="font-size:12px; color:var(--text2); font-weight:400;">/ˈæbsəluːt/</span></div>
+        <div class="word-list-mean">adj. 绝对的；完全的</div>
+      </div>
+      <span class="word-list-tag review">待复习</span>
     </div>
-  </div>
-  <div class="word-list-item">
-    <div class="word-list-check"></div>
-    <div class="word-list-text">
-      <div class="word-list-word">abstract</div>
-      <div class="word-list-mean">adj. 抽象的；n. 摘要</div>
+    <div class="word-list-item">
+      <div class="word-list-check" onclick="toggleCheck(this)"></div>
+      <div class="word-list-text">
+        <div class="word-list-word">abstract <span style="font-size:12px; color:var(--text2); font-weight:400;">/ˈæbstrækt/</span></div>
+        <div class="word-list-mean">adj. 抽象的；n. 摘要</div>
+      </div>
+      <span class="word-list-tag new">新词</span>
+    </div>
+    <div class="word-list-item">
+      <div class="word-list-check" onclick="toggleCheck(this)"></div>
+      <div class="word-list-text">
+        <div class="word-list-word">absorb <span style="font-size:12px; color:var(--text2); font-weight:400;">/əbˈsɔːrb/</span></div>
+        <div class="word-list-mean">v. 吸收；理解，掌握</div>
+      </div>
+      <span class="word-list-tag review">待复习</span>
+    </div>
+    <div class="word-list-item">
+      <div class="word-list-check" onclick="toggleCheck(this)"></div>
+      <div class="word-list-text">
+        <div class="word-list-word">abundant <span style="font-size:12px; color:var(--text2); font-weight:400;">/əˈbʌndənt/</span></div>
+        <div class="word-list-mean">adj. 丰富的，充裕的</div>
+      </div>
+      <span class="word-list-tag new">新词</span>
     </div>
   </div>
 </div>
 
-<!-- 统计 -->
+<!-- ==================== 数据统计 ==================== -->
 <div class="page" id="page-stats">
   <div class="nav-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
     <div class="nav-title">数据统计</div>
     <div style="width:36px;"></div>
   </div>
+
   <div class="card">
     <div class="section-title">📈 学习趋势</div>
-    <div class="chart-placeholder">[学习趋势图表占位]</div>
+    <div class="chart-tabs">
+      <button class="chart-tab active" onclick="setChartTab(this, 'week')">本周</button>
+      <button class="chart-tab" onclick="setChartTab(this, 'month')">本月</button>
+      <button class="chart-tab" onclick="setChartTab(this, 'year')">全年</button>
+    </div>
+    <canvas id="trendChart" width="380" height="180" style="width:100%;"></canvas>
   </div>
+
   <div class="card">
     <div class="section-title">💬 对话练习统计</div>
     <div class="stat-row" style="margin-bottom:0;">
@@ -400,44 +737,95 @@
         <div class="stat-num">86%</div>
         <div class="stat-label">单词使用率</div>
       </div>
+      <div class="stat-card" style="box-shadow:none; background:#F0F9F6;">
+        <div class="stat-num">24</div>
+        <div class="stat-label">总纠错数</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">⏰ 学习时间分布</div>
+    <canvas id="timeChart" width="380" height="160" style="width:100%;"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="section-title">🎯 能力成长</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:100px; padding:12px; background:#F0F9F6; border-radius:12px; text-align:center;">
+        <div style="font-size:22px; font-weight:800; color:var(--primary-dark);">1,250</div>
+        <div style="font-size:12px; color:var(--text2);">累计单词</div>
+      </div>
+      <div style="flex:1; min-width:100px; padding:12px; background:#F0F9F6; border-radius:12px; text-align:center;">
+        <div style="font-size:22px; font-weight:800; color:var(--primary-dark);">32</div>
+        <div style="font-size:12px; color:var(--text2);">连续天数</div>
+      </div>
+      <div style="flex:1; min-width:100px; padding:12px; background:#F0F9F6; border-radius:12px; text-align:center;">
+        <div style="font-size:22px; font-weight:800; color:var(--primary-dark);">48h</div>
+        <div style="font-size:12px; color:var(--text2);">学习时长</div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- 设置 -->
+<!-- ==================== 设置 ==================== -->
 <div class="page" id="page-settings">
   <div class="nav-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
     <div class="nav-title">设置</div>
     <div style="width:36px;"></div>
   </div>
+
+  <div class="section-title">🎵 发音设置</div>
   <div class="setting-item">
-    <div>
-      <div style="font-weight:600;">英音 / 美音</div>
-      <div style="font-size:13px; color:var(--text2);">美音</div>
-    </div>
-    <div class="toggle on"></div>
+    <div><div style="font-weight:600;">英音 / 美音</div><div style="font-size:13px; color:var(--text2);">当前：美音</div></div>
+    <div class="toggle on" onclick="toggleSwitch(this)"></div>
   </div>
   <div class="setting-item">
-    <div>
-      <div style="font-weight:600;">自动播放发音</div>
-    </div>
-    <div class="toggle on"></div>
+    <div><div style="font-weight:600;">自动播放发音</div><div style="font-size:13px; color:var(--text2);">切换卡片时自动播放</div></div>
+    <div class="toggle on" onclick="toggleSwitch(this)"></div>
   </div>
   <div class="setting-item">
-    <div>
-      <div style="font-weight:600;">学习提醒</div>
-      <div style="font-size:13px; color:var(--text2);">每日 20:00</div>
-    </div>
-    <div class="toggle"></div>
+    <div><div style="font-weight:600;">AI对话语音朗读</div></div>
+    <div class="toggle on" onclick="toggleSwitch(this)"></div>
+  </div>
+
+  <div class="section-title" style="margin-top:16px;">🔔 提醒设置</div>
+  <div class="setting-item">
+    <div><div style="font-weight:600;">学习提醒</div><div style="font-size:13px; color:var(--text2);">每日 20:00</div></div>
+    <div class="toggle" onclick="toggleSwitch(this)"></div>
   </div>
   <div class="setting-item">
-    <div style="font-weight:600; color:var(--danger);">重置学习进度</div>
+    <div><div style="font-weight:600;">复习提醒</div><div style="font-size:13px; color:var(--text2);">有待复习单词时提醒</div></div>
+    <div class="toggle on" onclick="toggleSwitch(this)"></div>
+  </div>
+
+  <div class="section-title" style="margin-top:16px;">🎨 外观</div>
+  <div class="setting-item">
+    <div><div style="font-weight:600;">深色模式</div></div>
+    <div class="toggle" onclick="toggleSwitch(this)"></div>
+  </div>
+
+  <div class="section-title" style="margin-top:16px;">⚙️ 其他</div>
+  <div class="setting-item">
+    <div><div style="font-weight:600;">每日学习量</div><div style="font-size:13px; color:var(--text2);">20 个新词 / 天</div></div>
     <div style="color:var(--text2);">›</div>
+  </div>
+  <div class="setting-item">
+    <div><div style="font-weight:600;">清除缓存</div></div>
+    <div style="color:var(--text2);">›</div>
+  </div>
+  <div class="setting-item" onclick="showToast('重置成功')">
+    <div style="font-weight:600; color:var(--danger);">⚠️ 重置学习进度</div>
+    <div style="color:var(--text2);">›</div>
+  </div>
+
+  <div style="text-align:center; margin-top:30px; font-size:12px; color:var(--text2);">
+    词说AI v1.0.0<br>用户ID: 88239471
   </div>
 </div>
 
-<!-- 对话记录 -->
+<!-- ==================== 对话记录 ==================== -->
 <div class="page" id="page-history">
   <div class="nav-header">
     <div class="back-btn" onclick="goPage('page-home')">‹</div>
@@ -447,10 +835,10 @@
   <div class="card" onclick="goPage('page-review')">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <span class="badge">今日</span>
-      <span style="font-size:12px; color:var(--text2);">14:32</span>
+      <span style="font-size:12px; color:var(--text2);">14:45</span>
     </div>
     <div style="font-weight:700; margin-bottom:4px;">四级核心词 - 第12轮</div>
-    <div style="font-size:13px; color:var(--text2);">对话 5 轮 · 单词使用率 80% · 错误 1 个</div>
+    <div style="font-size:13px; color:var(--text2);">对话 4 轮 · 单词使用率 60% · 错误 2 个 · 评级 B+</div>
   </div>
   <div class="card" onclick="goPage('page-review')">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -458,7 +846,15 @@
       <span style="font-size:12px; color:var(--text2);">19:15</span>
     </div>
     <div style="font-weight:700; margin-bottom:4px;">四级核心词 - 第11轮</div>
-    <div style="font-size:13px; color:var(--text2);">对话 8 轮 · 单词使用率 75% · 错误 2 个</div>
+    <div style="font-size:13px; color:var(--text2);">对话 8 轮 · 单词使用率 75% · 错误 2 个 · 评级 A</div>
+  </div>
+  <div class="card" onclick="goPage('page-review')">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <span class="badge" style="background:rgba(107,114,128,0.1); color:#6B7280;">10-20</span>
+      <span style="font-size:12px; color:var(--text2);">20:30</span>
+    </div>
+    <div style="font-weight:700; margin-bottom:4px;">生词本专项练习</div>
+    <div style="font-size:13px; color:var(--text2);">对话 6 轮 · 单词使用率 90% · 错误 0 个 · 评级 S</div>
   </div>
 </div>
 
@@ -482,6 +878,7 @@
 </div>
 
 <script>
+// ==================== 全局 ====================
 function goPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -489,16 +886,254 @@ function goPage(id) {
   const noNavPages = ['page-study','page-chat','page-complete','page-review','page-settings','page-history'];
   document.getElementById('bottom-nav').style.display = noNavPages.includes(id) ? 'none' : 'flex';
 }
-function nextWord() {
-  alert('标记完成，切换至下一张卡片');
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
 }
-function showComplete() {
-  goPage('page-complete');
+
+// ==================== 首页日历 ====================
+const calendar = document.getElementById('calendar');
+const days = ['日','一','二','三','四','五','六'];
+days.forEach(d => { const el = document.createElement('div'); el.className='cal-day'; el.textContent=d; calendar.appendChild(el); });
+for(let i=0;i<30;i++){
+  const el = document.createElement('div');
+  el.className='cal-cell';
+  el.textContent = i+1;
+  if([1,2,3,4,5,6,8,9,10,11,12,15,16,17,18,19,20,22,23,24,25].includes(i+1)) el.classList.add('done');
+  else if([7,13,14,21].includes(i+1)) el.classList.add('half');
+  calendar.appendChild(el);
+}
+
+// ==================== 词书筛选 ====================
+function setTag(el) {
+  el.parentElement.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const cat = el.textContent;
+  document.querySelectorAll('#book-list .book-list-item').forEach(item => {
+    item.style.display = (cat === '全部' || item.dataset.tag === cat) ? 'flex' : 'none';
+  });
+}
+function filterBooks(keyword) {
+  const k = keyword.toLowerCase();
+  document.querySelectorAll('#book-list .book-list-item').forEach(item => {
+    const text = item.innerText.toLowerCase();
+    item.style.display = text.includes(k) ? 'flex' : 'none';
+  });
+}
+
+// ==================== 单词学习 ====================
+const words = [
+  {word:'abandon', phonetic:'/əˈbændən/', mean:'v. 抛弃，放弃\nn. 放任，狂热', root:'ab-（离开）+ bandon（权力）', examples:['They had to abandon their car in the snow.','The baby was abandoned on the hospital steps.'], synonym:'desert, forsake', antonym:'retain, keep'},
+  {word:'ability', phonetic:'/əˈbɪləti/', mean:'n. 能力，才能', root:'来自 able（能够）+ -ity（名词后缀）', examples:['She has the ability to speak four languages.','The test measures your mathematical ability.'], synonym:'capability, capacity', antonym:'inability, disability'},
+  {word:'absolute', phonetic:'/ˈæbsəluːt/', mean:'adj. 绝对的；完全的', root:'ab-（离开）+ solu（松开）→ 完全松开 → 绝对的', examples:['I have absolute confidence in her.','There is no absolute standard for beauty.'], synonym:'complete, total', antonym:'relative, partial'},
+  {word:'absorb', phonetic:'/əbˈsɔːrb/', mean:'v. 吸收；理解，掌握', root:'ab-（加强）+ sorb（吸）', examples:['Plants absorb carbon dioxide.','It took me hours to absorb all the details.'], synonym:'soak up, take in', antonym:'release, emit'},
+  {word:'abstract', phonetic:'/ˈæbstrækt/', mean:'adj. 抽象的；n. 摘要', root:'abs-（离开）+ tract（拉）→ 拉开 → 抽象', examples:['Truth and beauty are abstract concepts.','Please write an abstract of your paper.'], synonym:'theoretical, summary', antonym:'concrete, specific'},
+];
+let wordIndex = 0;
+let studyMode = 0;
+function startStudy() {
+  wordIndex = 0;
+  updateWordCard();
+  goPage('page-study');
+}
+function updateWordCard() {
+  const w = words[wordIndex];
+  document.getElementById('word-text').textContent = w.word;
+  document.getElementById('word-text-back').textContent = w.word;
+  document.getElementById('word-phonetic').textContent = w.phonetic;
+  document.getElementById('word-meaning').innerHTML = w.meaning.replace(/\n/g,'<br>');
+  document.getElementById('study-progress-text').textContent = `${wordIndex+1}/${words.length}`;
+  document.getElementById('study-progress-bar').style.width = `${((wordIndex+1)/words.length)*100}%`;
+  document.getElementById('flip-card').classList.remove('flipped');
+  document.querySelector('.spell-input').value = '';
+  document.querySelectorAll('.spell-letter').forEach((el,i) => { el.classList.remove('filled','error'); if(i===0 || i===2 || i===4) el.classList.add('filled'); });
+  document.querySelectorAll('.choice-btn').forEach(b => { b.classList.remove('correct','wrong'); b.disabled = false; });
+}
+function flipCard() {
+  if(studyMode === 0) document.getElementById('flip-card').classList.toggle('flipped');
+}
+function nextWord(level) {
+  if(wordIndex < words.length-1) {
+    wordIndex++;
+    updateWordCard();
+  } else {
+    document.getElementById('complete-count').textContent = words.length;
+    document.getElementById('complete-know').textContent = Math.floor(words.length*0.7);
+    goPage('page-complete');
+  }
+}
+function setMode(m) {
+  studyMode = m;
+  document.querySelectorAll('.mode-tab').forEach((t,i) => t.classList.toggle('active', i===m));
+  document.getElementById('study-card-area').style.display = (m===0) ? 'block' : 'none';
+  document.getElementById('choice-area').style.display = (m===1||m===2) ? 'block' : 'none';
+  document.getElementById('spell-area').style.display = (m===3) ? 'block' : 'none';
+  if(m===1) { document.getElementById('choice-question').textContent = '选择正确的英文单词'; document.getElementById('choice-word').textContent = '抛弃，放弃'; }
+  if(m===2) { document.getElementById('choice-question').textContent = '听发音，选择正确释义'; document.getElementById('choice-word').innerHTML = '🔊 点击播放'; }
+}
+function checkChoice(btn, correct) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  if(correct) { btn.classList.add('correct'); showToast('回答正确 ✓'); setTimeout(()=>nextWord(2), 800); }
+  else { btn.classList.add('wrong'); showToast('回答错误 ✗'); setTimeout(()=>nextWord(0), 800); }
+}
+function checkSpell(e) {
+  if(e.key !== 'Enter') return;
+  const input = document.getElementById('spell-input').value.toLowerCase();
+  const target = words[wordIndex].word.toLowerCase();
+  const hints = document.querySelectorAll('.spell-letter');
+  if(input === target) {
+    hints.forEach((h,i) => { h.textContent = target[i]||''; h.classList.add('filled'); });
+    showToast('拼写正确 ✓');
+    setTimeout(()=>nextWord(2), 600);
+  } else {
+    hints.forEach(h => h.classList.add('error'));
+    showToast('拼写错误 ✗');
+    setTimeout(()=>{ hints.forEach(h => h.classList.remove('error')); document.getElementById('spell-input').value=''; }, 600);
+  }
 }
 function toggleDetail() {
   const el = document.getElementById('word-detail');
+  const w = words[wordIndex];
+  el.innerHTML = `
+    <div class="detail-section"><div class="detail-section-title">📌 词根词缀</div><div>${w.root}</div></div>
+    <div class="detail-section"><div class="detail-section-title">📝 例句</div>${w.examples.map(ex => `<div class="example-sentence" onclick="playAudio()">🔊 ${ex}</div>`).join('')}</div>
+    <div class="detail-section"><div class="detail-section-title">🔗 同反义词</div><div>同义：${w.synonym} &nbsp;|&nbsp; 反义：${w.antonym}</div></div>
+  `;
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
+function playAudio() { showToast('🔊 播放发音'); }
+
+// ==================== AI对话 ====================
+let chatRound = 4;
+let isRecording = false;
+function togglePool() {
+  document.getElementById('chat-pool').classList.toggle('collapsed');
+}
+function startRecord() {
+  isRecording = true;
+  document.getElementById('mic-btn').classList.add('recording');
+  document.getElementById('recording-indicator').style.display = 'block';
+}
+function stopRecord() {
+  if(!isRecording) return;
+  isRecording = false;
+  document.getElementById('mic-btn').classList.remove('recording');
+  document.getElementById('recording-indicator').style.display = 'none';
+  const msgs = [
+    "I think traveling helps people grow and learn to adapt.",
+    "Sometimes I feel overwhelmed by academic pressure.",
+    "Nature has an abundant supply of resources if we protect it."
+  ];
+  const msg = msgs[Math.floor(Math.random()*msgs.length)];
+  addUserMsg(msg);
+}
+function sendMsg() {
+  const input = document.getElementById('chat-input');
+  if(!input.value.trim()) return;
+  addUserMsg(input.value);
+  input.value = '';
+}
+function addUserMsg(text) {
+  const area = document.getElementById('chat-area');
+  const typing = document.getElementById('typing-msg');
+  const html = `<div class="msg user"><div style="display:flex; flex-direction:column; align-items:flex-end;"><div class="msg-bubble">${text}</div><div class="msg-voice" onclick="playAudio()">▶</div></div></div>`;
+  area.insertBefore(document.createRange().createContextualFragment(html).firstChild, typing);
+  typing.style.display = 'flex';
+  area.scrollTop = area.scrollHeight;
+  chatRound++;
+  document.getElementById('chat-round').textContent = chatRound;
+  setTimeout(() => {
+    typing.style.display = 'none';
+    const replies = [
+      "That's a great point! The ability to adapt is indeed crucial in both travel and life.",
+      "I see. Have you tried to accelerate your learning by practicing every day?",
+      "Interesting perspective! Do you think abstract thinking helps with problem-solving?"
+    ];
+    const reply = replies[Math.floor(Math.random()*replies.length)];
+    const rHtml = `<div class="msg ai"><div><div class="msg-bubble">${reply}</div><div class="msg-voice" onclick="playAudio()">▶</div></div></div>`;
+    area.insertBefore(document.createRange().createContextualFragment(rHtml).firstChild, typing);
+    area.scrollTop = area.scrollHeight;
+    if(chatRound >= 8) { setTimeout(()=>{ showToast('对话已达8轮上限'); goPage('page-review'); }, 1500); }
+  }, 1500);
+}
+
+// ==================== 生词本 ====================
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+}
+function toggleSelectAll() {
+  const all = document.querySelectorAll('#fav-list .word-list-check');
+  const allChecked = Array.from(all).every(c => c.classList.contains('checked'));
+  all.forEach(c => { c.classList.toggle('checked', !allChecked); c.textContent = !allChecked ? '✓' : ''; });
+}
+
+// ==================== 统计图表 ====================
+function drawLineChart(canvasId, data, labels, color) {
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const pad = 30;
+  const max = Math.max(...data) * 1.2;
+  const stepX = (w - pad*2) / (data.length-1);
+  // grid
+  ctx.strokeStyle = '#E5F4EF'; ctx.lineWidth = 1;
+  for(let i=0;i<=4;i++){ const y = pad + (h-pad*2)*(i/4); ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(w-pad,y); ctx.stroke(); }
+  // line
+  ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath();
+  data.forEach((v,i) => { const x = pad + i*stepX; const y = h - pad - (v/max)*(h-pad*2); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.stroke();
+  // fill
+  ctx.fillStyle = color.replace(')', ',0.1)').replace('rgb','rgba');
+  ctx.beginPath(); ctx.moveTo(pad, h-pad);
+  data.forEach((v,i) => { const x = pad + i*stepX; const y = h - pad - (v/max)*(h-pad*2); ctx.lineTo(x,y); });
+  ctx.lineTo(w-pad, h-pad); ctx.closePath(); ctx.fill();
+  // points
+  data.forEach((v,i) => { const x = pad + i*stepX; const y = h - pad - (v/max)*(h-pad*2); ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill(); ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke(); });
+  // labels
+  ctx.fillStyle='#6B7280'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+  labels.forEach((l,i) => { ctx.fillText(l, pad + i*stepX, h-8); });
+}
+function drawBarChart(canvasId, data, labels, color) {
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const pad = 30;
+  const max = Math.max(...data) * 1.2;
+  const barW = (w - pad*2) / data.length * 0.6;
+  const gap = (w - pad*2) / data.length;
+  data.forEach((v,i) => {
+    const x = pad + i*gap + (gap-barW)/2;
+    const barH = (v/max)*(h-pad*2);
+    const y = h - pad - barH;
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.roundRect(x, y, barW, barH, [6,6,0,0]); ctx.fill();
+    ctx.fillStyle='#6B7280'; ctx.font='11px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(labels[i], x+barW/2, h-8);
+    ctx.fillStyle=color; ctx.fillText(v, x+barW/2, y-6);
+  });
+}
+function setChartTab(el, period) {
+  el.parentElement.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if(period === 'week') drawLineChart('trendChart', [12,18,15,22,28,20,15], ['周一','周二','周三','周四','周五','周六','周日'], 'rgb(45,212,168)');
+  else if(period === 'month') drawLineChart('trendChart', [10,14,12,18,22,20,25,30,28,35,32,38,40,42,38,45,50,48,55,52,58,60,55,62,65,70,68,75,72,80], Array.from({length:30},(_,i)=>i+1), 'rgb(45,212,168)');
+  else drawLineChart('trendChart', [120,180,250,320,400,480,550,620,700,780,850,920], ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'], 'rgb(45,212,168)');
+}
+setTimeout(() => {
+  drawLineChart('trendChart', [12,18,15,22,28,20,15], ['周一','周二','周三','周四','周五','周六','周日'], 'rgb(45,212,168)');
+  drawBarChart('timeChart', [30,45,20,60,90,120,80], ['6:00','9:00','12:00','15:00','18:00','21:00','24:00'], '#2DD4A8');
+}, 300);
+
+// ==================== 设置 ====================
+function toggleSwitch(el) { el.classList.toggle('on'); }
 </script>
 </body>
 </html>
